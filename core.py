@@ -492,7 +492,8 @@ def noise_addition(value, noise):
     return value
 
 
-def samples_generation(matrix, N_new, fix=False, loc=0.0, scale=1.0):
+def samples_generation(matrix, N_new, fix=False, loc=0.0, scale=1.0):    
+    numpy.random.seed(1234)
     non_zero_columns = get_non_zero_columns(matrix)   
     N = matrix.shape[0]
     columns_count = matrix.shape[1]
@@ -750,6 +751,7 @@ class ClassifierFramework(MongoWorker):
         return
 
     def finalize_negatives_population(self):
+        numpy.random.seed(1234)
         final_list = []
         positives_count = float(len(self.examples["positives"]))
         c = len(self.upper_ec_numbers) 
@@ -1055,7 +1057,8 @@ class ClassifierFramework(MongoWorker):
         F.close()
                 
  
-    def summarization(self):
+    def summarization(self):        
+        numpy.random.seed(1234)
         colors = {"no_"+self.ec_number:"#323030", "seed_no_"+self.ec_number:"#848282", 
                   self.ec_number:"#882426", "seed_"+self.ec_number:"#C39192"}
         positives_df = self.df[self.df['class'] == self.ec_number]
