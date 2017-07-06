@@ -1,0 +1,43 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jun 26 23:25:35 2017
+
+@author: thodoris
+"""
+
+import core
+import ml_core
+import sys
+import multiprocessing
+import os
+import operator
+import pymongo
+
+main_dir = sys.argv[1]
+mongo_db_name = sys.argv[2]
+hmm_db_name = sys.argv[3]
+
+# python 6_training_data_construction.py batman_classifiers/prokaryotes/PFAM/ prokaryotes PFAM
+
+client = pymongo.MongoClient()
+db = client[mongo_db_name]
+collection = db["ec_numbers"]
+results = collection.find({},{"ec_number":1})
+ecs = []
+for entry in results:
+    ecs.append(entry["ec_number"])
+
+ecs = sorted(list(set(ecs)))
+lengths = map(lambda ec: str(len(ec.replace("-", "").replace(".", ""))), ecs)
+
+ec_tuples = zip(ecs, lengths)
+ec_tuples = sorted(ec_tuples, key=operator.itemgetter(1), reverse=True)
+
+
+for ec_tuple in ec_tuples:
+    ec_number = ec_tuple[0]
+    if ec_number.startswith("3.1."):
+        TD = ml_core.TrainingDatathon(ec_number, mongo_db_name, hmm_db_name,
+                                      main_dir)
+
+

@@ -1,0 +1,11 @@
+
+1. UPDATE UNIPROT DATABASE:
+
+python create_UniprotMongo_instance.py UniProt/all_organisms.tab all_organisms
+
+
+
+
+2. CREATE FASTA BATCHES:
+
+python creates_fasta_batches.py prokaryotes 8 20 for_hmmer/prokaryotes_batches/
