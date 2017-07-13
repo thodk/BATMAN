@@ -36,7 +36,7 @@ ec_tuples = sorted(ec_tuples, key=operator.itemgetter(1), reverse=True)
 
 for ec_tuple in ec_tuples:
     ec_number = ec_tuple[0]
-    if ec_number == "3.1.1.1":
+    if ec_number == "3.4.11.10":
         TD = ml_core.TrainingDatathon(ec_number, mongo_db_name, hmm_db_name,
                                       main_dir)
 
