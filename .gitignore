@@ -1,2 +1,4 @@
+/batman_classifiers/*
+6_*
 hmmer_results/*
-batman_classifiers/*
+*.pyc
