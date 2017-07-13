@@ -501,6 +501,7 @@ class TrainingDatathon(object):
         if integer == 0:    
             CF.set_training_data()
             CF.deal_with_imbalance()
+            CF.dimensionality_reduction()
             CF.summarization()
             CF.write_training_data()
 

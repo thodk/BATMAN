@@ -14,7 +14,11 @@ import operator
 import copy
 import cPickle
 import subprocess
+<<<<<<< HEAD
 import warnings
+=======
+import feature_selection_core
+>>>>>>> 4aa56a313402f27d6a7b65f4e4d20068598d0532
 from sklearn import linear_model
 from sklearn import tree
 from sklearn import model_selection
@@ -1020,6 +1024,7 @@ class ClassifierFramework(MongoWorker):
         positives_df = self.df[self.df['class'] == self.ec_number]
         pos_count = float(positives_df.shape[0])
         try:
+
 	    ratio = neg_count / float(pos_count)
             F = open(self.file_name, 'a')
             F.write("initial_populations_log_ratio,"+str(ratio)+"\n")
@@ -1063,11 +1068,24 @@ class ClassifierFramework(MongoWorker):
 
         F.close()
                 
+
+    def dimensionality_reduction(self):
+        
+        if self.df.shape[1]>30:
+            self.df = feature_selection_core.exe(self.df, self.positive_class)
+            F = open(self.file_name, 'a')
+            F.write("dimensionality_reduction,True\n")
+            F.write("final_features,"+str(self.df.shape[1]-1)+"\n")
+            F.close()        
+        else:
+            F = open(self.file_name, 'a')
+            F.write("dimensionality_reduction,False\n")
+            F.close()              
+            pass
  
     def summarization(self):        
         numpy.random.seed(1234)
-        colors = {"no_"+self.ec_number:"#323030", "seed_no_"+self.ec_number:"#848282", 
-                  self.ec_number:"#882426", "seed_"+self.ec_number:"#C39192"}
+        colors = {"no_"+self.ec_number:"#061a70", self.ec_number:"#70020a"}
         positives_df = self.df[self.df['class'] == self.ec_number]
         negatives_df = self.df[self.df['class'] != self.ec_number]
 
@@ -1075,10 +1093,19 @@ class ClassifierFramework(MongoWorker):
         min_value = 0
         max_value = 100
         linspace = numpy.linspace(min_value, max_value, num=500)
-        
-        for feature in self.features["positives"]:
 
-            plt.figure(figsize=(20,12), dpi=300)
+        features = list(set(list(self.df.columns.values)) & set(self.features["positives"]))
+
+        
+        for feature in features:
+            plt.figure(facecolor='black')            
+            figure, axes = plt.subplots(nrows=1, ncols=1, figsize=(10,6), 
+                                        dpi=150)
+            figure.patch.set_facecolor('blue')            
+            axes.tick_params(axis='both', length=0, labelcolor='#010100', labelsize=8)
+            axes.set_facecolor('#b7b5b8')
+            axes.grid(linestyle='-', alpha=0.2, color='#010100') #matplotlib.axes.Axes.grid
+
             max_freqs = []
             for key in sorted(tmp_dict.keys()):
                 if key == 1:
@@ -1086,11 +1113,13 @@ class ClassifierFramework(MongoWorker):
                 else:
                     tmp_df = negatives_df
                 values =  list(tmp_df[feature].astype(float))
-                if len(values) == 1:
-                    values.append(values[0]+numpy.random.uniform(0,1))
-                    values.append(values[0]-numpy.random.uniform(0,1))
-                elif len(values) == 0:
+                while values.count(0)>1:
+                    values.remove(0)
+                if len(values) < 2:
                     continue
+                #elif len(values) == 1:
+                    #values.append(values[0]+numpy.random.uniform(0,1))
+                    #values.append(values[0]-numpy.random.uniform(0,1))
                 else:
                     pass
                 try:
@@ -1101,24 +1130,23 @@ class ClassifierFramework(MongoWorker):
                 except numpy.linalg.linalg.LinAlgError:
                     y =  [0]*len(linspace)
 
-                plt.plot(linspace, y, label=tmp_dict[key],
-                         c=colors[tmp_dict[key]], linewidth=3.0)
-                         
-                plt.fill_between(linspace, y, color=colors[tmp_dict[key]], 
-                                 alpha='0.20')
+                axes.plot(linspace, y, label=tmp_dict[key],
+                          color=colors[tmp_dict[key]], linewidth=2.0)
+                axes.fill_between(linspace, y, color=colors[tmp_dict[key]], 
+                                 alpha='0.50')
+
             max_freq = max(max_freqs)
-            plt.grid(color='grey', linestyle='-')
-            plt.xlabel(feature+" bit score", size=24, labelpad=24)
-            plt.xlim([min_value, max_value+2])
-            plt.xticks(range(10,110,10), size=16)
-            plt.ylabel("Frequency", size=24, labelpad=24)
-            plt.ylim([0,max_freq+0.02])
-            plt.xlim([0,100])
-            plt.yticks([])
-            plt.title(feature+ " bit score distributions", size=32, y=1.02)
-            plt.legend(loc='upper right', ncol=1, borderaxespad=1, fontsize=24)
+            
+            
+            axes.set_title("Non Zero Score Distribution\nfor "+feature, size=18, color='#010100')
+            axes.set_xlabel("Bit score", size=14, color='#010100')
+            axes.set_xlim([0,100])
+            axes.set_xticks(range(10,110,10))
+            axes.set_ylim([0,max_freq+0.02])
+            axes.set_yticks([])
+            axes.legend(loc='upper right', ncol=1, borderaxespad=1, fontsize=16)
             # http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig
-            plt.savefig(self.directory+feature+".png")        
+            figure.savefig(self.directory+feature+".png")        
             plt.close('all')
 
     def write_training_data(self):
