@@ -66,7 +66,8 @@ def cv_adaboost(X, Y, ranked_features_list, pos_label, recursion_step=0.05,
     estimator = AdaBoostClassifier(base_estimator=base_estimator, n_estimators=10, random_state=1234)
     batches_scores = {}
     i=0
-
+    print batch
+    print ranked_features_list
     for n_features in range(batch, len(ranked_features_list), batch):
         if n_features > max_n_features:
             break
