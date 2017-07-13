@@ -54,6 +54,8 @@ def cv_adaboost(X, Y, ranked_features_list, pos_label, recursion_step=0.05,
                 cv=10, max_n_features=400):        
     if recursion_step < 1.:
         batch = int(len(ranked_features_list)*float(recursion_step))
+	if batch == 0:
+	    batch = 1
     else:
         batch = recursion_step
 
@@ -142,7 +144,10 @@ def calculate_ss_res(true, pred):
 def calculate_r_squared(true, pred):
     ss_tot = calculate_ss_tot(true)
     ss_res = calculate_ss_res(true, pred)
-    r_s = 1 - (ss_res / float(ss_tot))
+    if ss_tot == 0.:
+	r_s = 1
+    else:
+        r_s = 1 - (ss_res / float(ss_tot))
     return r_s
     
 
@@ -237,7 +242,8 @@ def exe(data_frame, pos_label, n_components=0.95, pca_coefs_threshold=0.01,
     ranked_features = pca_selection(X)
     scores = cv_adaboost(X, Y, ranked_features, pos_label)
     best_value = find_maximum(X, Y, scores)
-    
+    if best_value < 5:
+        best_value = 5
     best_features_indices = ranked_features[:best_value]
     best_features = list(df_X.columns.values[best_features_indices])
     best_features.insert(0, 'class')

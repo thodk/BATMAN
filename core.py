@@ -14,11 +14,8 @@ import operator
 import copy
 import cPickle
 import subprocess
-<<<<<<< HEAD
 import warnings
-=======
 import feature_selection_core
->>>>>>> 4aa56a313402f27d6a7b65f4e4d20068598d0532
 from sklearn import linear_model
 from sklearn import tree
 from sklearn import model_selection
