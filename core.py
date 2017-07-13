@@ -14,6 +14,7 @@ import operator
 import copy
 import cPickle
 import subprocess
+import warnings
 from sklearn import linear_model
 from sklearn import tree
 from sklearn import model_selection
@@ -22,7 +23,11 @@ from sklearn.cluster import AffinityPropagation
 from imblearn import over_sampling
 from scipy.stats import gaussian_kde
 from scipy.spatial.distance import pdist
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+warnings.filterwarnings('error')
 
 numpy.random.seed(1234)
 
@@ -760,8 +765,8 @@ class ClassifierFramework(MongoWorker):
         else:
             while c > 0:
                 try:
-                    ratio = numpy.log2(len(final_list)) - numpy.log2(positives_count)
-                except ValueError:
+                    ratio = len(final_list) / float(positives_count)
+                except (ValueError, RuntimeWarning):
                     ratio = 0
                 if (len(final_list) < min_majority_size(positives_count) or ratio<0.32):
                     ec = sorted(self.upper_ec_numbers)[c-1]
@@ -770,7 +775,7 @@ class ClassifierFramework(MongoWorker):
                 else:
                     break
         try:
-            ratio = numpy.math.log(len(final_list)/positives_count, 2)
+            ratio = len(final_list)/float(positives_count)
         except ValueError:
             ratio = 0
 
@@ -954,8 +959,6 @@ class ClassifierFramework(MongoWorker):
             F.close()
             return 1
         tmp_list = self.get_pos_features()
-        if len(tmp_list) == 2:
-            print self.ec_number
         if len(tmp_list) == 0:
             F = open(self.file_name, 'a')
             F.write("Process termination,No positive features\n")
@@ -1016,11 +1019,15 @@ class ClassifierFramework(MongoWorker):
         neg_count = float(negatives_df.shape[0])
         positives_df = self.df[self.df['class'] == self.ec_number]
         pos_count = float(positives_df.shape[0])
-        ratio = round(numpy.log2(neg_count) - numpy.log2(pos_count),2)
-        F = open(self.file_name, 'a')
-        F.write("initial_populations_log_ratio,"+str(ratio)+"\n")
-        F.write("initial_populations_natural_ratio,"+str(round(numpy.power(2,ratio),2))+"\n")
-        
+        try:
+	    ratio = neg_count / float(pos_count)
+            F = open(self.file_name, 'a')
+            F.write("initial_populations_log_ratio,"+str(ratio)+"\n")
+            #F.write("initial_populations_natural_ratio,"+str(round(numpy.power(2,ratio),2))+"\n")
+        except (ValueError, RuntimeWarning):
+	    ratio = "0 in log"
+	    F.write("initial_populations_log_ratio,"+str(ratio)+"\n")
+
         if ratio > 0.32:
             # attempt 1: remove duplicates
             tmp_df = negatives_df.ix[:, negatives_df.columns != 'class']
@@ -1030,7 +1037,7 @@ class ClassifierFramework(MongoWorker):
             rownames = negatives_filtered + positives
             self.df = self.df.ix[rownames]
             self.examples["final_negatives"] = negatives_filtered[:]
-            ratio = round(numpy.log2(len(negatives_filtered)) - numpy.log2(pos_count),2)
+            ratio = round(len(negatives_filtered) / float(pos_count),2)
             F.write("negatives_without_duplicates,"+str(len(negatives_filtered))+"\n")
             F.write("updated_populations_log_ratio,"+str(ratio)+"\n")
             if ratio > 0.32:
@@ -1048,7 +1055,7 @@ class ClassifierFramework(MongoWorker):
             positives_df = self.df[self.df['class'] == self.ec_number]
             negatives_df = self.df[self.df['class'] != self.ec_number]
             ids = list(i for i in negatives_df.index if i.startswith("neg"))
-            ratio = round(numpy.log2(negatives_df.shape[0]) - numpy.log2(positives_df.shape[0]),2)
+            ratio = round(negatives_df.shape[0] / float(positives_df.shape[0]) ,2)
             F.write("generated_examples,"+str(len(ids))+"\n")
             F.write("updated_populations_log_ratio,"+str(ratio)+"\n")
         else:
