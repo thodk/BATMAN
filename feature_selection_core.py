@@ -240,12 +240,25 @@ def exe(data_frame, pos_label, n_components=0.95, pca_coefs_threshold=0.01,
     
     ranked_features = pca_selection(X)
     scores = cv_adaboost(X, Y, ranked_features, pos_label)
-    best_value = find_maximum(X, Y, scores)
-    if best_value < 5:
-        best_value = 5
+
+    all_scores = []
+    for key, values in scores.items():
+        if values["score"] > 0.99:
+            all_scores.append(1)
+	else:
+	    all_scores.append(0)
+
+    if sum(all_scores) == len(all_scores):
+	best_value = 5
+    else:
+    	best_value = find_maximum(X, Y, scores)
+	if best_value < 5:
+	    best_value = 5
+    
     best_features_indices = ranked_features[:best_value]
     best_features = list(df_X.columns.values[best_features_indices])
     best_features.insert(0, 'class')
+
     return data_frame[list(best_features)]
     
     
