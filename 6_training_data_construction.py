@@ -34,10 +34,23 @@ ec_tuples = zip(ecs, lengths)
 ec_tuples = sorted(ec_tuples, key=operator.itemgetter(1), reverse=True)
 
 
+<<<<<<< HEAD
 for ec_tuple in ec_tuples:
     ec_number = ec_tuple[0]
     if ec_number == "3.4.11.10":
         TD = ml_core.TrainingDatathon(ec_number, mongo_db_name, hmm_db_name,
                                       main_dir)
 
+=======
+ec3 = list(ec[0] for ec in ec_tuples if ec[0].startswith("4."))
+a = len(ec3)
+i=0
+#ec3 = ["1.-.-.-", "4.-.-.-"]
+for ec_number in ec3:
+    if ec_number.count("-") == 3:
+        continue
+    i+=1
+    print ec_number, str(i), "/", str(a)
+    TD = ml_core.TrainingDatathon(ec_number, mongo_db_name, hmm_db_name, main_dir)
+>>>>>>> 7ff30768b47176f6253d5219b87f85ce0f154c77
 
