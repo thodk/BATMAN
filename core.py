@@ -1110,18 +1110,21 @@ class ClassifierFramework(MongoWorker):
                 else:
                     tmp_df = negatives_df
                 values =  list(tmp_df[feature].astype(float))
-                while values.count(0)>1:
+                while values.count(0)>0:
                     values.remove(0)
-                if len(values) < 2:
+                if len(values) == 1:
+                    values.append(values[0]-numpy.random.uniform(1,2))
+                    values.append(values[0]+numpy.random.uniform(1,2))
+                elif len(values) == 0:
                     continue
-                #elif len(values) == 1:
-                    #values.append(values[0]+numpy.random.uniform(0,1))
-                    #values.append(values[0]-numpy.random.uniform(0,1))
+                elif numpy.std(values) == 0:
+                    values.append(values[0]-numpy.random.uniform(1,2))
+                    values.append(values[0]+numpy.random.uniform(1,2))
                 else:
                     pass
                 try:
                     kde = gaussian_kde(values)
-                    kde.set_bandwidth(bw_method=kde.factor / 1.5)             
+                    kde.set_bandwidth(bw_method=kde.factor / 1.)             
                     y = kde(linspace)
                     max_freqs.append(max(kde.pdf(linspace)))
                 except numpy.linalg.linalg.LinAlgError:

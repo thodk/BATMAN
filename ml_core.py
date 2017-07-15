@@ -502,7 +502,7 @@ class TrainingDatathon(object):
             CF.set_training_data()
             CF.deal_with_imbalance()
             CF.dimensionality_reduction()
-            CF.summarization()
+            #CF.summarization()
             CF.write_training_data()
 
 

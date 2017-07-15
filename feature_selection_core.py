@@ -43,6 +43,7 @@ def pca_selection(X, n_components=0.95, pca_coefs_threshold=0.01):
         features_list.append([feature, score])
     
     features_list = sorted(features_list, key=operator.itemgetter(1), reverse=True)
+    print features_list
     features_list = list(i[0] for i in features_list)
     #print "initial features:", X.shape[1] 
     #print "final features:", len(features_list)
@@ -238,7 +239,14 @@ def exe(data_frame, pos_label, n_components=0.95, pca_coefs_threshold=0.01,
     df_Y = data_frame.ix[:, data_frame.columns == 'class']
     Y = df_Y['class'].as_matrix()
     
-    ranked_features = pca_selection(X)
+    if df_X.shape[1] < 100:
+        pca_coefs_threshold = 0.025
+    else:
+        pca_coefs_threshold = 0.01
+    
+    
+    ranked_features = pca_selection(X, pca_coefs_threshold=pca_coefs_threshold)
+    '''
     scores = cv_adaboost(X, Y, ranked_features, pos_label)
 
     all_scores = []
@@ -254,8 +262,9 @@ def exe(data_frame, pos_label, n_components=0.95, pca_coefs_threshold=0.01,
     	best_value = find_maximum(X, Y, scores)
 	if best_value < 5:
 	    best_value = 5
-    
-    best_features_indices = ranked_features[:best_value]
+    '''
+    #best_features_indices = ranked_features[:best_value]
+    best_features_indices = ranked_features[:]
     best_features = list(df_X.columns.values[best_features_indices])
     best_features.insert(0, 'class')
 
