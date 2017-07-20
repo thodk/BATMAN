@@ -43,7 +43,6 @@ def pca_selection(X, n_components=0.95, pca_coefs_threshold=0.01):
         features_list.append([feature, score])
     
     features_list = sorted(features_list, key=operator.itemgetter(1), reverse=True)
-    print features_list
     features_list = list(i[0] for i in features_list)
     #print "initial features:", X.shape[1] 
     #print "final features:", len(features_list)
